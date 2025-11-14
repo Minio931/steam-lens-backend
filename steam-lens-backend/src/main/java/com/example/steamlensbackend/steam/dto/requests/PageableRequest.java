@@ -7,6 +7,7 @@ public class PageableRequest {
     public int getPage() {
         return page;
     }
+
     public void setPage(int page) {
         this.page = page;
     }

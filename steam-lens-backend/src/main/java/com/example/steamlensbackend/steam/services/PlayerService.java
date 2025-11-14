@@ -12,30 +12,16 @@ import java.util.Map;
 
 @Service
 public class PlayerService {
-    private SteamService steamService;
+    private final SteamService steamService;
 
     public PlayerService(SteamService steamService) {
         this.steamService = steamService;
     }
 
     public Mono<PagedResponse<List<GameResponse>>> getUserGames(String steamid, int page, int pageSize) {
-
         return steamService.getUserOwnedGames(steamid, null).map(
                 response -> response.response().games()
-        )
-        .map(
-            gameResponses -> {
-                int totalPages = (int) Math.ceil((double) gameResponses.size() / pageSize);
-                int offset = page * pageSize;
-
-                List<GameResponse> content = gameResponses.stream()
-                        .skip(offset)
-                        .limit(pageSize)
-                        .toList();
-
-                return PagedResponse.of(content, new Meta(page, pageSize, totalPages, gameResponses.size()));
-            }
-        );
+        ).map(gameResponses -> PageableService.paginate(gameResponses, page, pageSize));
     }
 
     public Mono<Map<String, Integer>> getNumberOfUserGames(String steamid) {
